@@ -1,18 +1,17 @@
 extern crate yaml_rust;
 
 use std::collections::HashMap;
-use yaml_rust::yaml::Yaml;
 use yaml_rust::YamlLoader;
 use std::path::Path;
 use std::fs::File;
 use std::io::Read;
-use std::io::{Error as IOError};
+use std::io::Error as IOError;
 use yaml_rust::scanner::ScanError;
 
 pub enum Error {
     UserHome,
     IO(IOError),
-    Yaml(ScanError)
+    Yaml(ScanError),
 }
 
 impl From<IOError> for Error {
@@ -129,7 +128,9 @@ impl Config {
         Self::from_path(home)
     }
 
-    pub fn from_path<P>(path: P) -> Result<Config, Error> where P: AsRef<Path> {
+    pub fn from_path<P>(path: P) -> Result<Config, Error>
+        where P: AsRef<Path>
+    {
         let mut f = try!(File::open(path));
         let mut s = String::new();
         try!(f.read_to_string(&mut s));
@@ -149,34 +150,16 @@ impl Config {
         for c in doc["users"].as_vec().unwrap().iter() {
             let name = &c["name"];
             let user = &c["user"];
-            let token = match &user["token"] {
-                &Yaml::String(ref value) => Some(value.to_owned()),
-                _ => None,
-            };
-            let username = match &user["username"] {
-                &Yaml::String(ref value) => Some(value.to_owned()),
-                _ => None,
-            };
-            let password = match &user["password"] {
-                &Yaml::String(ref value) => Some(value.to_owned()),
-                _ => None,
-            };
-            let client_cert = match &user["client-certificate"] {
-                &Yaml::String(ref value) => Some(Content::Path(value.to_owned())),
-                _ => None,
-            };
-            let client_key = match &user["client-key"] {
-                &Yaml::String(ref value) => Some(Content::Path(value.to_owned())),
-                _ => None,
-            };
-            let client_cert_data = match &user["client-certificate-data"] {
-                &Yaml::String(ref value) => Some(Content::Data(value.to_owned())),
-                _ => None,
-            };
-            let client_key_data = match &user["client-key-data"] {
-                &Yaml::String(ref value) => Some(Content::Data(value.to_owned())),
-                _ => None,
-            };
+            let token = user["token"].as_str().map(|s| s.to_owned());
+            let username = user["username"].as_str().map(|s| s.to_owned());
+            let password = user["password"].as_str().map(|s| s.to_owned());
+            let client_cert =
+                user["client-certificate"].as_str().map(|s| Content::Path(s.to_owned()));
+            let client_key = user["client-key"].as_str().map(|s| Content::Path(s.to_owned()));
+            let client_cert_data =
+                user["client-certificate-data"].as_str().map(|s| Content::Data(s.to_owned()));
+            let client_key_data =
+                user["client-key-data"].as_str().map(|s| Content::Data(s.to_owned()));
             let u = User::new(client_cert_data.or(client_cert),
                               client_key_data.or(client_key),
                               token,
@@ -189,18 +172,9 @@ impl Config {
             let name = &c["name"];
             let context = &c["context"];
 
-            let cluster = match &context["cluster"] {
-                &Yaml::String(ref value) => Some(value.to_owned()),
-                _ => None,
-            };
-            let namespace = match &context["namespace"] {
-                &Yaml::String(ref value) => Some(value.to_owned()),
-                _ => None,
-            };
-            let user = match &context["user"] {
-                &Yaml::String(ref value) => Some(value.to_owned()),
-                _ => None,
-            };
+            let cluster = context["cluster"].as_str().map(|s| s.to_owned());
+            let namespace = context["namespace"].as_str().map(|s| s.to_owned());
+            let user = context["user"].as_str().map(|s| s.to_owned());
             let ctx = Context::new(cluster, namespace, user);
             context_map.insert(name.as_str().map(|s| s.to_owned()).unwrap(), ctx);
         }
@@ -209,26 +183,13 @@ impl Config {
             let name = &c["name"];
             let cluster = &c["cluster"];
 
-            let server = match &cluster["server"] {
-                &Yaml::String(ref value) => Some(value.to_owned()),
-                _ => None,
-            };
-            let cluster_version = match &cluster["api-version"] {
-                &Yaml::String(ref value) => Some(value.to_owned()),
-                _ => None,
-            };
-            let cert_authority_path = match &cluster["certificate-authority"] {
-                &Yaml::String(ref value) => Some(Content::Path(value.to_owned())),
-                _ => None,
-            };
-            let cert_authority_data = match &cluster["certificate-authority-data"] {
-                &Yaml::String(ref value) => Some(Content::Data(value.to_owned())),
-                _ => None,
-            };
-            let skip_tls_verify = match &cluster["insecure-skip-tls-verify"] {
-                &Yaml::Boolean(ref value) => Some(value.to_owned()),
-                _ => None,
-            };
+            let server = cluster["server"].as_str().map(|s| s.to_owned());
+            let cluster_version = cluster["api-version"].as_str().map(|s| s.to_owned());
+            let cert_authority_path =
+                cluster["certificate-authority"].as_str().map(|s| Content::Path(s.to_owned()));
+            let cert_authority_data =
+                cluster["certificate-authority-data"].as_str().map(|s| Content::Data(s.to_owned()));
+            let skip_tls_verify = cluster["insecure-skip-tls-verify"].as_bool();
             let cl = Cluster::new(cluster_version,
                                   server,
                                   skip_tls_verify,
