@@ -9,7 +9,7 @@ use std::io::Error as IOError;
 use yaml_rust::scanner::ScanError;
 
 pub enum Error {
-    UserHome,
+    Homeless,
     IO(IOError),
     Yaml(ScanError),
 }
@@ -122,7 +122,7 @@ pub struct Config {
 
 impl Config {
     pub fn from_std_path() -> Result<Config, Error> {
-        let mut home = try!(std::env::home_dir().ok_or(Error::UserHome));
+        let mut home = try!(std::env::home_dir().ok_or(Error::Homeless));
         home.push(".kube");
         home.push("config");
         Self::from_path(home)
