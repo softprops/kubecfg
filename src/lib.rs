@@ -26,10 +26,17 @@ impl From<ScanError> for Error {
     }
 }
 
+
+pub type Result<T> = std::result::Result<T, Error>;
+
+/// Represents a kubernetes cluster and namespace authentication
 #[derive(Debug)]
 pub struct Context {
+    /// The name of a cluster
     pub cluster: Option<String>,
+    /// The name of a namespace
     pub namespace: Option<String>,
+    /// The name of a user
     pub user: Option<String>,
 }
 
@@ -52,14 +59,22 @@ pub enum Content {
     Data(String),
 }
 
+/// Describes information needed to resolve
+/// a connection to a cluster
 #[derive(Debug)]
 pub struct Cluster {
+    /// The clusters supported api version
     pub api_version: String,
+    /// The name of the server
     pub server: String,
+    /// Predicate used to determine if a client should skip tls verification
     pub insecure_skip_tls_verify: bool,
+    /// Content used by client to certify the server is authentic
     pub certificate_authority: Option<Content>,
 }
 
+/// User authentication credentials
+/// to authenticate requests to a kubernetes cluster
 #[derive(Debug)]
 pub struct User {
     pub client_certificate: Option<Content>,
@@ -112,23 +127,30 @@ impl Default for Cluster {
     }
 }
 
+/// Represents local kubernetes configuration settings
 #[derive(Debug)]
 pub struct Config {
+    /// A map of cluster name to cluster
     pub clusters: HashMap<String, Cluster>,
+    /// A map of context name to context
     pub contexts: HashMap<String, Context>,
+    /// A map of user name to user
     pub users: HashMap<String, User>,
+    /// The current context's name
     pub current_context: String,
 }
 
 impl Config {
-    pub fn from_std_path() -> Result<Config, Error> {
+    /// Reads a Config object from the default location on disk
+    pub fn from_std_path() -> Result<Config> {
         let mut home = try!(std::env::home_dir().ok_or(Error::Homeless));
         home.push(".kube");
         home.push("config");
         Self::from_path(home)
     }
 
-    pub fn from_path<P>(path: P) -> Result<Config, Error>
+    /// Reads a Config object from a custom location on disk
+    pub fn from_path<P>(path: P) -> Result<Config>
         where P: AsRef<Path>
     {
         let mut f = try!(File::open(path));
@@ -137,11 +159,11 @@ impl Config {
         Self::from_str(s.as_ref())
     }
 
-    pub fn from_str(raw: &str) -> Result<Config, Error> {
+    /// Reads a Config object from a raw string payload
+    pub fn from_str(raw: &str) -> Result<Config> {
         let yml = try!(YamlLoader::load_from_str(raw));
 
         let doc = &yml[0];
-        //    println!("{:#?}", doc);
         let mut cluster_map = HashMap::new();
         let mut context_map = HashMap::new();
         let mut user_map = HashMap::new();
