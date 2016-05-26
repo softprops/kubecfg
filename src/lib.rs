@@ -8,9 +8,15 @@ use std::io::Read;
 use std::io::Error as IOError;
 use yaml_rust::scanner::ScanError;
 
+/// Encapsulation of potential errors
+/// that may happen when resolving
+/// a kubernetets config
 pub enum Error {
+    /// A failure to resolve a home directory
     Homeless,
+    /// IO errors
     IO(IOError),
+    /// Failure to parse yaml data
     Yaml(ScanError),
 }
 
@@ -26,7 +32,7 @@ impl From<ScanError> for Error {
     }
 }
 
-
+/// A type alias for the result operations which may return an `kubecfg::Error`
 pub type Result<T> = std::result::Result<T, Error>;
 
 /// Represents a kubernetes cluster and namespace authentication
@@ -53,9 +59,12 @@ impl Context {
     }
 }
 
+/// Represents a way to resolve content
 #[derive(Debug)]
 pub enum Content {
+    /// Location of content on disk
     Path(String),
+    /// Raw content string
     Data(String),
 }
 
@@ -65,7 +74,7 @@ pub enum Content {
 pub struct Cluster {
     /// The clusters supported api version
     pub api_version: String,
-    /// The name of the server
+    /// The server URI
     pub server: String,
     /// Predicate used to determine if a client should skip tls verification
     pub insecure_skip_tls_verify: bool,
