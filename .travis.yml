@@ -20,8 +20,7 @@ addons:
     - libcurl4-openssl-dev
     - libelf-dev
     - libdw-dev
-    - binutils-dev
-    - libbfd-dev
+
 after_success: |
   [ $TRAVIS_RUST_VERSION = stable ] &&
   [ $TRAVIS_BRANCH = master ] &&
@@ -34,7 +33,7 @@ after_success: |
   wget https://github.com/SimonKagstrom/kcov/archive/master.tar.gz &&
   tar xzf master.tar.gz && mkdir kcov-master/build && cd kcov-master/build && cmake .. && make && make install DESTDIR=../tmp && cd ../.. &&
   ls target/debug &&
-  ./kcov-master/tmp/usr/local/bin/kcov --verify --coveralls-id=$TRAVIS_JOB_ID --exclude-pattern=/.cargo target/kcov target/debug/kubecfg-*
+  ./kcov-master/tmp/usr/local/bin/kcov --coveralls-id=$TRAVIS_JOB_ID --exclude-pattern=/.cargo target/kcov target/debug/kubecfg-*
 env:
   global:
     secure: Qlfy88V+swrbEXm5YmGwlQRuukdjJK3bLoTy6PLbga7Z7v1LoT4ZCj8R8SVWv4+UlWAqnd17e/eoZ0nx2s6HwYh8oU054cPuWbMXti4XyzDQmw5GsEIfmiZ/htCiJ23RRquDFa3xfnoMeBeKIko3pEbTn2TybDutvvCTISiCZ5pxaDzfdPzOuXPpNl8Ei75WCYgiK8u3cg2Vo8jTc+uT232Qdl2zk6uMrGQ0stHVvSnO5Y0ehs7qM2xwC23/MOZKkmU5kRXy1Fv8qKHPo+HG8DDpTBhjVRVokPYKecnQj7DfFd4kTWe/kZyVOhpXUhtACbxFDfAb7eBa/VBDvhKz8Ik4D3em7utCiC6C1LaGhHtuR+CRybDhGR0uQ0Eb1AKryrLU4Bd7JmU59hhNZAxgEHrO7x3Y27ptOz58d3cVbfKY8/b+cHr3LtVILCC64Fu+gKvhRBVjy/ZHySYw1WYYIfus1RKlHh0MLSmlB6F+MHUMVaWR0ekEoETk54P/G2EK96HkFpldvSPQaMXrF9zc05ubXv6S6FyA/m5HTnVzVFl0ccx3dBKZeVrLReOlae+0KfTVESIVOIyWvq94RmgiVZbC+PBqlhpM7/4bKa7wSeHb5DaAP+zqVktWc4o5IwHjEREcwsNy2rEonzmEAE0zHSAvErDYGbR/NV/vXqoPiSM=
