@@ -173,14 +173,14 @@ impl Config {
         let yml = try!(YamlLoader::load_from_str(raw));
 
         let doc = &yml[0];
-        let mut cluster_map = HashMap::new();
-        let mut context_map = HashMap::new();
-        let mut user_map = HashMap::new();
+        let mut clusters = HashMap::new();
+        let mut contexts = HashMap::new();
+        let mut users = HashMap::new();
         let current_context = doc["current-context"].as_str().map(|c| c.to_owned()).unwrap();
 
-        for c in doc["users"].as_vec().unwrap().iter() {
-            let name = &c["name"];
-            let user = &c["user"];
+        for binding in doc["users"].as_vec().unwrap().iter() {
+            let name = &binding["name"];
+            let user = &binding["user"];
             let token = user["token"].as_str().map(|s| s.to_owned());
             let username = user["username"].as_str().map(|s| s.to_owned());
             let password = user["password"].as_str().map(|s| s.to_owned());
@@ -196,23 +196,23 @@ impl Config {
                               token,
                               username,
                               password);
-            user_map.insert(name.as_str().map(|s| s.to_owned()).unwrap(), u);
+            users.insert(name.as_str().map(|s| s.to_owned()).unwrap(), u);
         }
 
-        for c in doc["contexts"].as_vec().unwrap().iter() {
-            let name = &c["name"];
-            let context = &c["context"];
+        for binding in doc["contexts"].as_vec().unwrap().iter() {
+            let name = &binding["name"];
+            let context = &binding["context"];
 
             let cluster = context["cluster"].as_str().map(|s| s.to_owned());
             let namespace = context["namespace"].as_str().map(|s| s.to_owned());
             let user = context["user"].as_str().map(|s| s.to_owned());
             let ctx = Context::new(cluster, namespace, user);
-            context_map.insert(name.as_str().map(|s| s.to_owned()).unwrap(), ctx);
+            contexts.insert(name.as_str().map(|s| s.to_owned()).unwrap(), ctx);
         }
 
-        for c in doc["clusters"].as_vec().unwrap().iter() {
-            let name = &c["name"];
-            let cluster = &c["cluster"];
+        for binding in doc["clusters"].as_vec().unwrap().iter() {
+            let name = &binding["name"];
+            let cluster = &binding["cluster"];
 
             let server = cluster["server"].as_str().map(|s| s.to_owned());
             let cluster_version = cluster["api-version"].as_str().map(|s| s.to_owned());
@@ -225,12 +225,12 @@ impl Config {
                                   server,
                                   skip_tls_verify,
                                   cert_authority_data.or(cert_authority_path));
-            cluster_map.insert(name.as_str().map(|s| s.to_owned()).unwrap(), cl);
+            clusters.insert(name.as_str().map(|s| s.to_owned()).unwrap(), cl);
         }
         Ok(Config {
-            clusters: cluster_map,
-            contexts: context_map,
-            users: user_map,
+            clusters: clusters,
+            contexts: contexts,
+            users: users,
             current_context: current_context,
         })
     }
