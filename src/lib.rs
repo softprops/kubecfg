@@ -152,9 +152,9 @@ pub struct Config {
 impl Config {
     /// Reads a Config object from the default location on disk
     pub fn from_std_path() -> Result<Config> {
-        let mut home = try!(std::env::home_dir().ok_or(Error::Homeless));
-        home.push(".kube");
-        home.push("config");
+        let home = try!(std::env::home_dir().ok_or(Error::Homeless))
+            .join(".kube")
+            .join("config");
         Self::from_path(home)
     }
 
