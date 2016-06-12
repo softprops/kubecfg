@@ -11,6 +11,7 @@ use yaml_rust::scanner::ScanError;
 /// Encapsulation of potential errors
 /// that may happen when resolving
 /// a kubernetets config
+#[derive(Debug)]
 pub enum Error {
     /// A failure to resolve a home directory
     Homeless,
@@ -36,7 +37,7 @@ impl From<ScanError> for Error {
 pub type Result<T> = std::result::Result<T, Error>;
 
 /// Represents a kubernetes cluster and namespace authentication
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Context {
     /// The name of a cluster
     pub cluster: Option<String>,
@@ -60,7 +61,7 @@ impl Context {
 }
 
 /// Represents a way to resolve content
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Content {
     /// Location of content on disk
     Path(String),
@@ -70,7 +71,7 @@ pub enum Content {
 
 /// Describes information needed to resolve
 /// a connection to a cluster
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Cluster {
     /// The clusters supported api version
     pub api_version: String,
@@ -84,7 +85,7 @@ pub struct Cluster {
 
 /// User authentication credentials
 /// to authenticate requests to a kubernetes cluster
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct User {
     pub client_certificate: Option<Content>,
     pub client_key: Option<Content>,
@@ -137,7 +138,7 @@ impl Default for Cluster {
 }
 
 /// Represents local kubernetes configuration settings
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Config {
     /// A map of cluster name to cluster
     pub clusters: HashMap<String, Cluster>,
@@ -233,5 +234,55 @@ impl Config {
             users: users,
             current_context: current_context,
         })
+    }
+}
+
+
+#[cfg(test)]
+mod tests {
+    use super::Config;
+
+    #[test]
+    fn parse() {
+        let yaml = r#"current-context: federal-context
+apiVersion: v1
+clusters:
+- cluster:
+    api-version: v1
+    server: http://cow.org:8080
+  name: cow-cluster
+- cluster:
+    certificate-authority: path/to/my/cafile
+    server: https://horse.org:4443
+  name: horse-cluster
+- cluster:
+    insecure-skip-tls-verify: true
+    server: https://pig.org:443
+  name: pig-cluster
+contexts:
+- context:
+    cluster: horse-cluster
+    namespace: chisel-ns
+    user: green-user
+  name: federal-context
+- context:
+    cluster: pig-cluster
+    namespace: saw-ns
+    user: black-user
+  name: queen-anne-context
+kind: Config
+preferences:
+  colors: true
+users:
+- name: blue-user
+  user:
+    token: blue-token
+- name: green-user
+  user:
+    client-certificate: path/to/my/client/cert
+    client-key: path/to/my/client/key
+"#;
+
+        assert!(Config::from_str(yaml).is_ok());
     }
 }
