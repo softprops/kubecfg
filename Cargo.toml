@@ -2,6 +2,12 @@
 name = "kubecfg"
 version = "0.1.0"
 authors = ["softprops <d.tangren@gmail.com>"]
+description = "kubernetes config reader"
+documentation = "https://softprops.github.io/kubecfg"
+homepage = "https://github.com/softprops/kubecgf"
+repository = "https://github.com/softprops/kubecfg"
+keywords = ["k8s", "kubernetes"]
+license = "MIT"
 
 [dependencies]
 yaml-rust = "0.3"
